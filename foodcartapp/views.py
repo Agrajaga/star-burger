@@ -63,6 +63,13 @@ def register_order(request):
     order_data = request.data
     if not order_data:
         return Response()
+    if 'products' not in order_data:
+        return Response(['products: Обязательное поле'], status=400)
+    if not isinstance(order_data['products'], list):
+        return Response(['products: Ожидался list со значениями'], status=400)
+    if not order_data['products']:
+        return Response(['products: Список не может быть пустым'], status=400)
+
     new_order = Order.objects.create(
         first_name=order_data['firstname'],
         last_name=order_data['lastname'],
