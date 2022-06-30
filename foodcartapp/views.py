@@ -66,7 +66,11 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    products = OrderItemSerializer(many=True, allow_empty=False)
+    products = OrderItemSerializer(
+        many=True,
+        allow_empty=False,
+        write_only=True
+    )
 
     class Meta:
         model = Order
@@ -81,19 +85,19 @@ class OrderSerializer(serializers.ModelSerializer):
 
 @api_view(['POST'])
 def register_order(request):
-    serializer = OrderSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    print(serializer.validated_data)
+    validator = OrderSerializer(data=request.data)
+    validator.is_valid(raise_exception=True)
+
     new_order = Order.objects.create(
-        firstname=serializer.validated_data['firstname'],
-        lastname=serializer.validated_data['lastname'],
-        phonenumber=serializer.validated_data['phonenumber'],
-        address=serializer.validated_data['address'],
+        firstname=validator.validated_data['firstname'],
+        lastname=validator.validated_data['lastname'],
+        phonenumber=validator.validated_data['phonenumber'],
+        address=validator.validated_data['address'],
     )
-    products_fields = serializer.validated_data['products']
+    products_fields = validator.validated_data['products']
     order_items = [
         OrderItem(order=new_order, **fields) for fields in products_fields
     ]
     OrderItem.objects.bulk_create(order_items)
 
-    return Response({})
+    return Response(OrderSerializer(new_order).data)
