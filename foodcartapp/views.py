@@ -1,10 +1,10 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
-from rest_framework import serializers
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .models import Order, OrderItem, Product
+from .serializers import OrderSerializer
 
 
 def banners_list_api(request):
@@ -57,30 +57,6 @@ def product_list_api(request):
         'ensure_ascii': False,
         'indent': 4,
     })
-
-
-class OrderItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderItem
-        fields = ['product', 'quantity']
-
-
-class OrderSerializer(serializers.ModelSerializer):
-    products = OrderItemSerializer(
-        many=True,
-        allow_empty=False,
-        write_only=True
-    )
-
-    class Meta:
-        model = Order
-        fields = [
-            'firstname',
-            'lastname',
-            'phonenumber',
-            'address',
-            'products',
-        ]
 
 
 @api_view(['POST'])
