@@ -59,6 +59,7 @@ def product_list_api(request):
         'indent': 4,
     })
 
+
 @transaction.atomic
 @api_view(['POST'])
 def register_order(request):
