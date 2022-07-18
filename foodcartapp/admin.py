@@ -1,12 +1,12 @@
 from django.contrib import admin
+from django.http import HttpResponseRedirect
 from django.shortcuts import reverse
 from django.templatetags.static import static
 from django.utils.html import format_html
+from django.utils.http import url_has_allowed_host_and_scheme
 
-from .models import Order, OrderItem, Product
-from .models import ProductCategory
-from .models import Restaurant
-from .models import RestaurantMenuItem
+from .models import (Order, OrderItem, Product, ProductCategory, Restaurant,
+                     RestaurantMenuItem)
 
 
 class RestaurantMenuItemInline(admin.TabularInline):
@@ -122,3 +122,16 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [
         OrderItemInline,
     ]
+
+    def response_change(self, request, obj):
+        response = super().response_post_save_change(request, obj)
+        if (
+            "next" in request.GET and
+            url_has_allowed_host_and_scheme(
+                url=request.GET['next'],
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure()
+            )
+        ):
+            return HttpResponseRedirect(request.GET['next'])
+        return response
