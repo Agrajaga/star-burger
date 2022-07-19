@@ -122,6 +122,28 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [
         OrderItemInline,
     ]
+    readonly_fields = [
+        'registered_at',
+    ]
+    fieldsets = (
+        ('Общее', {
+            'fields': [
+                'status',
+                'firstname',
+                'lastname',
+                'phonenumber',
+                'address',
+                'comment',
+            ]
+        }),
+        ('История', {
+            'fields': [
+                'registered_at',
+                'called_at',
+                'delivered_at',
+            ],
+        }),
+    )
 
     def response_change(self, request, obj):
         response = super().response_post_save_change(request, obj)
