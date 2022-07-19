@@ -129,6 +129,7 @@ class OrderAdmin(admin.ModelAdmin):
         ('Общее', {
             'fields': [
                 'status',
+                'payment',
                 'firstname',
                 'lastname',
                 'phonenumber',

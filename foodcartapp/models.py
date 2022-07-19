@@ -189,6 +189,16 @@ class Order(models.Model):
         null=True,
         db_index=True,
     )
+    payment = models.PositiveSmallIntegerField(
+        'способ оплаты',
+        choices=[
+            (0, 'Наличные'),
+            (1, 'Электронно'),
+        ],
+        default=0,
+        db_index=True,
+    )
+
     objects = OrderQuerySet.as_manager()
 
     class Meta:
