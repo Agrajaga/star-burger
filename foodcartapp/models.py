@@ -132,6 +132,9 @@ class OrderQuerySet(QuerySet):
             cost=Sum(F('products__quantity') * F('products__price'))
         )
 
+    def active(self):
+        return self.filter(status__in=[0, 1, 2])
+
 
 class Order(models.Model):
     firstname = models.CharField(
@@ -151,6 +154,17 @@ class Order(models.Model):
     address = models.CharField(
         'адрес',
         max_length=150,
+        db_index=True,
+    )
+    status = models.PositiveSmallIntegerField(
+        'статус',
+        choices=[
+            (0, 'Новый'),
+            (1, 'Собирается'),
+            (2, 'Доставляется'),
+            (3, 'Выполнен'),
+        ],
+        default=0,
         db_index=True,
     )
     objects = OrderQuerySet.as_manager()
@@ -182,7 +196,6 @@ class OrderItem(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(0)]
     )
-
     quantity = models.PositiveSmallIntegerField('количество')
 
     class Meta:
