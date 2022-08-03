@@ -1,9 +1,21 @@
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import F, Sum
+from django.db.models import Count, F, Q, Sum
 from django.db.models.query import QuerySet
 from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
+
+
+class RestaurantQuerySet(models.QuerySet):
+    def suitable_for_order(self, order):
+        order_products = OrderItem.objects.filter(order=order)
+        return self.annotate(
+            prod_count=Count(
+                'menu_items__product',
+                filter=Q(menu_items__product__in=order_products.values(
+                    'product')) & Q(menu_items__availability=True)
+            )
+        ).filter(prod_count=order_products.count())
 
 
 class Restaurant(models.Model):
@@ -21,6 +33,7 @@ class Restaurant(models.Model):
         max_length=50,
         blank=True,
     )
+    objects = RestaurantQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'ресторан'

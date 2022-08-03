@@ -101,14 +101,7 @@ def view_orders(request):
     restaurants = []
     orders = Order.objects.with_costs().active()
     for order in orders:
-        order_products = OrderItem.objects.filter(order=order)
-        restaurants.append(Restaurant.objects.annotate(
-            prod_count=Count(
-                'menu_items__product',
-                filter=Q(menu_items__product__in=order_products.values(
-                    'product')) & Q(menu_items__availability=True)
-            )
-        ).filter(prod_count=order_products.count()))
+        restaurants.append(Restaurant.objects.suitable_for_order(order))
     orders_with_restaurants = list(zip(orders, restaurants))
 
     return render(request, template_name='order_items.html', context={
