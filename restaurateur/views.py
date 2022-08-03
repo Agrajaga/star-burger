@@ -2,11 +2,12 @@ from django import forms
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import user_passes_test
+from django.db.models import Count, Q
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
 
-from foodcartapp.models import Order, Product, Restaurant
+from foodcartapp.models import Order, OrderItem, Product, Restaurant
 
 
 class Login(forms.Form):
@@ -97,6 +98,19 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
+    restaurants = []
+    orders = Order.objects.with_costs().active()
+    for order in orders:
+        order_products = OrderItem.objects.filter(order=order)
+        restaurants.append(Restaurant.objects.annotate(
+            prod_count=Count(
+                'menu_items__product',
+                filter=Q(menu_items__product__in=order_products.values(
+                    'product')) & Q(menu_items__availability=True)
+            )
+        ).filter(prod_count=order_products.count()))
+    orders_with_restaurants = list(zip(orders, restaurants))
+
     return render(request, template_name='order_items.html', context={
-        'orders': Order.objects.with_costs().active(),
+        'orders': orders_with_restaurants,
     })
