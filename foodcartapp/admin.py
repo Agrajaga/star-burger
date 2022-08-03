@@ -4,6 +4,7 @@ from django.shortcuts import reverse
 from django.templatetags.static import static
 from django.utils.html import format_html
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.db.models import Count, Q
 
 from .models import (Order, OrderItem, Product, ProductCategory, Restaurant,
                      RestaurantMenuItem)
@@ -129,6 +130,7 @@ class OrderAdmin(admin.ModelAdmin):
         ('Общее', {
             'fields': [
                 'status',
+                'restaurant',
                 'payment',
                 'firstname',
                 'lastname',
@@ -158,3 +160,13 @@ class OrderAdmin(admin.ModelAdmin):
         ):
             return HttpResponseRedirect(request.GET['next'])
         return response
+
+    def render_change_form(self, request, context, *args, **kwargs):
+        context['adminform'].form.fields['restaurant'].queryset = Restaurant. \
+            objects.suitable_for_order(kwargs['obj'])
+
+        return super(OrderAdmin, self).render_change_form(
+            request,
+            context,
+            *args,
+            **kwargs)
