@@ -101,7 +101,10 @@ def view_orders(request):
     restaurants = []
     orders = Order.objects.with_costs().active()
     for order in orders:
-        restaurants.append(Restaurant.objects.suitable_for_order(order))
+        suitable_restaurants = []
+        if not order.restaurant:
+            suitable_restaurants = Restaurant.objects.suitable_for_order(order)
+        restaurants.append(suitable_restaurants)
     orders_with_restaurants = list(zip(orders, restaurants))
 
     return render(request, template_name='order_items.html', context={
