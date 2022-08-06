@@ -43,8 +43,8 @@
             <details>
               <summary>>>></summary>
               <ul>
-                {% for restaurant in restaurants %}
-                  <li>{{ restaurant }}</li>
+                {% for restaurant, distance in restaurants %}
+                  <li>{{ restaurant }}, {{ distance }}</li>
                 {% endfor %}
               </ul>
             </details>
