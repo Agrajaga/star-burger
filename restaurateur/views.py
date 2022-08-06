@@ -1,5 +1,4 @@
 from django import forms
-from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import user_passes_test
@@ -7,10 +6,9 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
 from geopy import distance
-from geopy.exc import GeopyError
-from geopy.geocoders import Yandex
 
 from foodcartapp.models import Order, Product, Restaurant
+from geocoderapp.models import GeoPoint
 
 
 class Login(forms.Form):
@@ -101,28 +99,31 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    geocoder = Yandex(api_key=settings.YANDEX_API_KEY)
     restaurants = []
     orders = Order.objects.with_costs().active()
     for order in orders:
         suitable_restaurants = []
         if not order.restaurant:
             suitable_restaurants = Restaurant.objects.suitable_for_order(order)
-            try:
-                _, order_coords = geocoder.geocode(order.address)
-                distances = []
-                for restaurant in suitable_restaurants:
-                    try:
+            distances = ['нет данных'] * len(suitable_restaurants)
+            order_point, _ = GeoPoint.objects.get_or_create(
+                address=order.address)
+            if order_point.calculated:
+                order_coords = (order_point.latitude, order_point.longitude)
+                for index, restaurant in enumerate(suitable_restaurants):
+                    restaurant_point, _ = GeoPoint.objects.get_or_create(
+                        address=restaurant.address
+                    )
+                    if restaurant_point.calculated:
+                        restaurant_coords = (
+                            restaurant_point.latitude,
+                            restaurant_point.longitude
+                        )
                         restaurant_distance = distance.distance(
-                                order_coords,
-                                geocoder.geocode(restaurant.address)[1]
+                            order_coords,
+                            restaurant_coords
                         ).km
-                        distances.append(f'{restaurant_distance:.2f} км.')
-                    except (GeopyError, TypeError):
-                        distances.append('нет данных')
-            except (GeopyError, TypeError):
-                distances = ['нет данных'] * len(suitable_restaurants)
-
+                        distances[index] = f'{restaurant_distance:.2f} км.'
         restaurants.append(
             sorted(
                 tuple(zip(suitable_restaurants, distances)),

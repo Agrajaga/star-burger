@@ -37,6 +37,10 @@ class GeoPoint(models.Model):
         'дата обновления',
         editable=False,
     )
+    calculated = models.BooleanField(
+        'адрес обработан',
+        default=False,
+    )
 
 
 @receiver(models.signals.pre_save, sender=GeoPoint)
@@ -47,6 +51,7 @@ def fill_coordinates(sender, instance, **kwargs):
             normalized_address, coords = geocoder.geocode(instance.address)
             instance.normalized_address = normalized_address
             instance.latitude, instance.longitude = coords
+            instance.calculated = True
         except (GeopyError, TypeError):
             instance.normalized_address = 'нет данных'
 
