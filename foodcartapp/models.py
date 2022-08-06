@@ -262,6 +262,5 @@ class OrderItem(models.Model):
 
 @receiver(models.signals.pre_save, sender=Order)
 def change_status(sender, instance, **kwargs):
-    print(instance)
     if instance.restaurant and instance.status == 0:
         instance.status = 1
