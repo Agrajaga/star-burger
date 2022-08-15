@@ -103,7 +103,7 @@ def view_orders(request):
     orders = Order.objects.with_costs().active()
     for order in orders:
         suitable_restaurants = []
-        if not order.restaurant:
+        if not order.provider:
             suitable_restaurants = Restaurant.objects.suitable_for_order(order)
             distances = ['нет данных'] * len(suitable_restaurants)
             order_point, _ = GeoPoint.objects.get_or_create(

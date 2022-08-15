@@ -212,10 +212,10 @@ class Order(models.Model):
         default=0,
         db_index=True,
     )
-    restaurant = models.ForeignKey(
+    provider = models.ForeignKey(
         Restaurant,
         related_name='orders',
-        verbose_name='ресторан',
+        verbose_name='ресторан-поставщик',
         on_delete=models.CASCADE,
         blank=True,
         null=True,
@@ -262,5 +262,5 @@ class OrderItem(models.Model):
 
 @receiver(models.signals.pre_save, sender=Order)
 def change_status(sender, instance, **kwargs):
-    if instance.restaurant and instance.status == 0:
+    if instance.provider and instance.status == 0:
         instance.status = 1

@@ -36,8 +36,8 @@
         <td>{{ order.address }}</td>
         <td>{{ order.comment }}</td>
         <td>
-          {% if order.restaurant %}
-            Готовит {{ order.restaurant }}
+          {% if order.provider %}
+            Готовит {{ order.provider }}
           {% else %}
             Может быть приготовлен ресторанами
             <details>
