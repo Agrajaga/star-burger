@@ -209,7 +209,7 @@ class Order(models.Model):
             (0, 'Наличные'),
             (1, 'Электронно'),
         ],
-        default=0,
+        default=1,
         db_index=True,
     )
     provider = models.ForeignKey(
