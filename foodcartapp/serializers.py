@@ -10,7 +10,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    products = OrderItemSerializer(
+    order_items = OrderItemSerializer(
         many=True,
         allow_empty=False,
         write_only=True
@@ -23,5 +23,5 @@ class OrderSerializer(serializers.ModelSerializer):
             'lastname',
             'phonenumber',
             'address',
-            'products',
+            'order_items',
         ]
