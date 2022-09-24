@@ -17,6 +17,7 @@ class GeoPoint(models.Model):
         'нормализованый адрес',
         max_length=150,
         db_index=True,
+        null=True,
     )
     latitude = models.DecimalField(
         'широта',
