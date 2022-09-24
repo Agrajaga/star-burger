@@ -261,9 +261,3 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f'{self.product} {self.order}'
-
-
-@receiver(models.signals.pre_save, sender=Order)
-def change_status(sender, instance, **kwargs):
-    if instance.provider and instance.status == 0:
-        instance.status = 1

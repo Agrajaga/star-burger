@@ -42,17 +42,17 @@ class GeoPoint(models.Model):
         default=False,
     )
 
-
-@receiver(models.signals.pre_save, sender=GeoPoint)
-def fill_coordinates(sender, instance, **kwargs):
-    if not instance.timestamp:
+    def fill_coordinates(self):
         try:
             geocoder = Yandex(api_key=settings.YANDEX_API_KEY)
-            normalized_address, coords = geocoder.geocode(instance.address)
-            instance.normalized_address = normalized_address
-            instance.latitude, instance.longitude = coords
-            instance.calculated = True
+            normalized_address, coords = geocoder.geocode(self.address)
+            self.normalized_address = normalized_address
+            self.latitude, self.longitude = coords
+            self.calculated = True
         except (GeopyError, TypeError):
-            instance.normalized_address = 'нет данных'
+            self.normalized_address = ''
+            self.latitude, self.longitude = None, None
+            self.calculated = False
 
-        instance.timestamp = datetime.now()
+        self.timestamp = datetime.now()
+        self.save()
