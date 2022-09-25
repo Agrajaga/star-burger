@@ -6,6 +6,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
 from geopy import distance
+from geopy.exc import GeopyError
 
 from foodcartapp.models import Order, Product, Restaurant
 from geocoderapp.models import GeoPoint
@@ -99,38 +100,55 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    restaurants = []
     orders = Order.objects.with_costs().active()
+    restaurants_with_distance = []
     for order in orders:
-        suitable_restaurants = []
-        if not order.provider:
-            suitable_restaurants = Restaurant.objects.suitable_for_order(order)
-            distances = ['нет данных'] * len(suitable_restaurants)
-            order_point, _ = GeoPoint.objects.get_or_create(
-                address=order.address)
-            if order_point.calculated:
-                order_coords = (order_point.latitude, order_point.longitude)
-                for index, restaurant in enumerate(suitable_restaurants):
-                    restaurant_point, _ = GeoPoint.objects.get_or_create(
-                        address=restaurant.address
-                    )
-                    if restaurant_point.calculated:
-                        restaurant_coords = (
-                            restaurant_point.latitude,
-                            restaurant_point.longitude
-                        )
-                        restaurant_distance = distance.distance(
-                            order_coords,
-                            restaurant_coords
-                        ).km
-                        distances[index] = f'{restaurant_distance:.2f} км.'
-        restaurants.append(
+        if order.provider:
+            restaurants_with_distance.append([])
+            continue
+
+        suitable_restaurants = Restaurant.objects.suitable_for_order(order)
+        distances = ['нет данных'] * len(suitable_restaurants)
+
+        order_point, _ = GeoPoint.objects.get_or_create(
+            address=order.address)
+        try:
+            if not order_point.calculated:
+                order_point.fill_coordinates()
+        except (GeopyError, TypeError):
+            restaurants_with_distance.append(
+                list(zip(suitable_restaurants, distances)),
+            )
+            continue
+        order_coords = (order_point.latitude, order_point.longitude)
+
+        for index, restaurant in enumerate(suitable_restaurants):
+            restaurant_point, _ = GeoPoint.objects.get_or_create(
+                address=restaurant.address
+            )
+            try:
+                if not restaurant_point.calculated:
+                    restaurant_point.fill_coordinates()
+            except (GeopyError, TypeError):
+                continue
+
+            restaurant_coords = (
+                restaurant_point.latitude,
+                restaurant_point.longitude
+            )
+            restaurant_distance = distance.distance(
+                order_coords,
+                restaurant_coords
+            ).km
+            distances[index] = f'{restaurant_distance:.2f} км.'
+
+        restaurants_with_distance.append(
             sorted(
                 tuple(zip(suitable_restaurants, distances)),
-                key=lambda restaurant: restaurant[1],
+                key=lambda item: item[1],
             )
         )
-    orders_with_restaurants = list(zip(orders, restaurants))
+    orders_with_restaurants = list(zip(orders, restaurants_with_distance))
 
     return render(request, template_name='order_items.html', context={
         'orders': orders_with_restaurants,

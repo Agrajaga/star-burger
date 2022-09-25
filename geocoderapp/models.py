@@ -2,7 +2,6 @@ from datetime import datetime
 
 from django.conf import settings
 from django.db import models
-from geopy.exc import GeopyError
 from geopy.geocoders import Yandex
 
 
@@ -43,16 +42,10 @@ class GeoPoint(models.Model):
     )
 
     def fill_coordinates(self):
-        try:
-            geocoder = Yandex(api_key=settings.YANDEX_API_KEY)
-            normalized_address, coords = geocoder.geocode(self.address)
-            self.normalized_address = normalized_address
-            self.latitude, self.longitude = coords
-            self.calculated = True
-        except (GeopyError, TypeError):
-            self.normalized_address = ''
-            self.latitude, self.longitude = None, None
-            self.calculated = False
-
+        geocoder = Yandex(api_key=settings.YANDEX_API_KEY)
+        normalized_address, coords = geocoder.geocode(self.address)
+        self.normalized_address = normalized_address
+        self.latitude, self.longitude = coords
+        self.calculated = True
         self.timestamp = datetime.now()
         self.save()
