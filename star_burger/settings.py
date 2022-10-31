@@ -45,9 +45,10 @@ MIDDLEWARE = [
 ]
 
 ROLLBAR_KEY = env('ROLLBAR_KEY')
+ROLLBAR_ENV = env('ROLLBAR_ENV')
 ROLLBAR = {
     'access_token': ROLLBAR_KEY,
-    'environment': 'development' if DEBUG else 'production',
+    'environment': ROLLBAR_ENV,
     'code_version': '1.0',
     'root': BASE_DIR,
 }

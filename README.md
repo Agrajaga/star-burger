@@ -149,6 +149,7 @@ Parcel будет следить за файлами в каталоге `bundle
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
 - `YANDEX_API_KEY` — ключ доступа к API YandexGeocoder, для определения координат по адресу. Для получения ключа пройдите по адресу https://developer.tech.yandex.ru/ 
 - `ROLLBAR_KEY` — ключ доступа к API Rollbar, для логирования. Для получения ключа необходимо зарегистрироваться по адресу https://rollbar.com/
+- `ROLLBAR_ENV` — название окружения, в рамках которого будет прводится логирование. По окружению можно будет проводить фильтрацию зарегистрированных событий.
 
 ## Цели проекта
 
