@@ -14,6 +14,6 @@ python manage.py collectstatic
 echo "Prepare database..."
 python manage.py migrate
 echo "Restart services..."
-sudo systemctl restart starburger
-sudo systemctl restart nginx
+systemctl restart starburger
+systemctl reload nginx
 echo "Success!"
