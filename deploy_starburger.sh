@@ -10,9 +10,9 @@ npm ci
 echo "Build JS modules..."
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 echo "Collect static files..."
-python manage.py collectstatic
+python manage.py collectstatic --noinput --clear
 echo "Prepare database..."
-python manage.py migrate
+python manage.py migrate --noinput --check
 echo "Restart services..."
 systemctl restart starburger
 systemctl reload nginx
