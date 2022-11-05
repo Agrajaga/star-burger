@@ -14,6 +14,6 @@ python manage.py collectstatic --noinput --clear
 echo "Prepare database..."
 python manage.py migrate --noinput --check
 echo "Restart services..."
-systemctl restart starburger
-systemctl reload nginx
+sudo systemctl restart starburger
+sudo systemctl reload nginx
 echo "Success!"
