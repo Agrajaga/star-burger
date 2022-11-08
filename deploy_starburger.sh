@@ -21,4 +21,4 @@ sudo systemctl restart starburger
 sudo systemctl reload nginx
 echo "Success!"
 
-curl -H "X-Rollbar-Access-Token: $ROLLBAR_KEY" -H "Content-Type: application/json" -X POST 'https://api.rollbar.com/api/1/deploy' -d '{"environment": "$ROLLBAR_ENV", "revision": "$(git rev-parse --short HEAD)", "local_username": "$(git config user.name)", "comment": "${1-}", "status": "succeeded"}'
+curl -H "X-Rollbar-Access-Token: $ROLLBAR_KEY" -H "Content-Type: application/json" -X POST 'https://api.rollbar.com/api/1/deploy' -d "{'environment': $ROLLBAR_ENV, 'revision': $(git rev-parse --short HEAD), 'local_username': $(git config user.name), 'comment': ${1-}, 'status': 'succeeded'}'
